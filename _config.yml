@@ -1,1 +1,4 @@
 remote_theme: coogie/oscailte
+oscailte:
+  social:
+    github: jekyll
