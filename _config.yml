@@ -2,3 +2,5 @@ remote_theme: coogie/oscailte
 title: Chili Assistant
 subtitle: Home Assistant integration for ChiliSleep's OOLER Sleep System
 oscailte:
+  strings:
+    hero_title: "Awaken your bed"
