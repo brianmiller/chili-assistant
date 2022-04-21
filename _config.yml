@@ -6,4 +6,4 @@ subtitle: Hook your OOLER into Home Assistant
 author: Chili Assistant
 simple_search: https://www.google.com/search
 description: >-
-        <p style="font-size: 75%;">Hook your ChiliSleep</p><p style="font-size: 50%;>&trade;</p> <p style="font-size: 75%;">OOLER Sleep System</p><p style="font-size: 50%;>&trade;</p> <p style="font-size: 75%;">into Home Assistant</p>
+        <style="font-size: 75%;">Hook your ChiliSleep</style><style="font-size: 50%;>&trade;</style> <style="font-size: 75%;">OOLER Sleep System</style><style="font-size: 50%;>&trade;</style> <style="font-size: 75%;">into Home Assistant</style>
