@@ -1,6 +1,14 @@
 remote_theme: coogie/oscailte
+
+url: https://brianmiller.github.io/chili-assistant/
 title: Chili Assistant
-subtitle: Home Assistant integration for ChiliSleep's OOLER Sleep System
+subtitle: Open source home automation that connects your ChiliSleep OOLER Sleep System to Home Assistant
+author: Chili Assistant
+simple_search: https://www.google.com/search
+description: >-
+  Open source home automation that puts local control and privacy first.
+  Powered by a worldwide community of tinkerers and DIY enthusiasts.
+  Perfect to run on a Raspberry Pi or a local server.
 oscailte:
   strings:
-    hero_title: "Awaken your bed"
+    #hero_title: "Awaken your bed"
