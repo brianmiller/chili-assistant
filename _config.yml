@@ -2,10 +2,8 @@ theme: jekyll-theme-architect
 
 url: https://brianmiller.github.io/chili-assistant/
 title: Chili Assistant
-subtitle: Open source home automation that connects your ChiliSleep OOLER Sleep System to Home Assistant
+subtitle: Hook your OOLER into Home Assistant
 author: Chili Assistant
 simple_search: https://www.google.com/search
 description: >-
-  Open source home automation that puts local control and privacy first.
-  Powered by a worldwide community of tinkerers and DIY enthusiasts.
-  Perfect to run on a Raspberry Pi or a local server.
+        Hook your ChiliSleep™ OOLER Sleep System™ into Home Assistant
