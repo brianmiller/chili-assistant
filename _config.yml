@@ -8,4 +8,4 @@ simple_search: https://www.google.com/search
 description: >-
         <label style="font-size: 65%;">Hook your ChiliSleep</label><label style="font-size: 35%;">&trade;</label><label style="font-size: 65%;"> OOLER Sleep System</label><label style="font-size: 35%;">&trade;</label><label style="font-size: 65%;"> into Home Assistant</label>
         <br>
-        <subtext><h2>*Chili Assistant is just for fun and not affiliated with ChiliSleep</h2></subtext>
+        <custom_style1>*Chili Assistant is just for fun and not affiliated with ChiliSleep</custom_style1>

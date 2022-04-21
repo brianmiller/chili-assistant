@@ -3,20 +3,6 @@
 
 @import "{{ site.theme }}";
 
-header {
-  img {
-    border-radius: 50%;
-  }
-  p {
-    text-align: center;
-  }
-  p.view {
-    text-align: left;
-  }
-}
-
-subtext {
-   h2 {
+custom_style1 {
     font-color: red;
-   }
 }
