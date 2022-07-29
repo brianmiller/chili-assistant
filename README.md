@@ -1,5 +1,7 @@
 # chili-assistant
 
+chili-assistant works with <a href="https://www.chilisleep.com/products/ooler-sleep-system">ChiliSleep's Ooler system</a> and communicates over Bluetooth Low Energy (BLE).  I'm using a Raspberry Pi 3 Model B, but any Linux system with a Bluetooth 4.0+ radio will work.
+
 chili-assistant requires a message bus.  I'm a fan of <a href=https://hub.docker.com/_/eclipse-mosquitto>Mosquitto MQTT</a> which works great with Home Assistant.
 
 Simple execution examples:
