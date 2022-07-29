@@ -1,0 +1,168 @@
+#!/bin/bash
+
+if [ ! "$2" ] ; then
+        echo "You must provide the MAC address to an Ooler and hostname/IP to the receiving MQTT broker, exiting..."
+        echo "  Example: ./ooler-service 5C:02:72:92:9F:FE 37648-mqtt1.phospher.com"
+        exit 1
+else
+        oolerMac="$1"
+	mqttBroker="$2"
+	hciconfig hci0 reset
+	mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac" -n -r
+fi
+
+
+#How many attempts should be made when reading and writing to and from an Ooler BLE target
+retries=10
+
+#How many seconds until the next poll
+pollFrequency=5
+
+
+function pollOolerUpdateMQTT() {
+	currentPower=$(tryandretry_read "0x0019")
+	currentFan=$(tryandretry_read "0x0025")
+	currentTemp=$((16#`tryandretry_read 0x002c`))
+	currentThermostat=$((16#`tryandretry_read 0x001d`))
+	currentWater=$(tryandretry_read "0x002f")
+
+	#If current water level is not too low to operate, set state of water level to 00(good)
+	if [ ! "$currentWater" = "01" ]; then
+		currentWater="00"
+	fi
+
+	mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac/state/power" -m "$currentPower" -r
+        mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac/state/fan" -m "$currentFan" -r
+        mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac/state/temp" -m "$currentTemp" -r
+        mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac/state/thermostat" -m "$currentThermostat" -r
+	mosquitto_pub -h "$mqttBroker" -t "oolers/$oolerMac/state/water" -m "$currentWater" -r
+}
+
+
+function tryandretry_read() {
+        counter=0
+        handle="$1"
+        gatttool --device=$oolerMac --char-read  --handle=$handle|rev|cut -d " " -f2|rev
+
+
+        RESULT=$?
+        if [ ! "$RESULT" = "0" ]; then
+		while [ $counter -lt $retries ]; do
+			echo "Retrying($counter)..."
+			counter=$((counter+1))
+			gatttool --device=$oolerMac --char-read  --handle=$handle|rev|cut -d " " -f2|rev
+			if [ $? = 0 ]; then
+				break
+			fi
+	                if [ $counter -ge $retries ]; then
+	                        echo "Maximum retries exceeded while reading from $oolerMac, skipping..."
+	                        break
+	                fi
+		done
+        fi
+}
+
+
+function tryandretry_write() {
+	counter=0
+	handle="$1"
+	topicPayload="$2"
+
+	echo "Writing $topicPayload to $handle"
+	gatttool --device=$oolerMac --char-write-req  --handle=$handle --value=$topicPayload
+	RESULT=$?
+	#echo "FOOOOOOOO RESULT: $RESULT"
+	if [ ! "$RESULT" = "0" ]; then
+		while [ $counter -lt $retries ]; do
+			echo "Retrying($counter)..."
+			counter=$((counter+1))
+			gatttool --device=$oolerMac --char-write-req  --handle=$handle --value=$topicPayload
+                        if [ $? = 0 ]; then
+                                break
+                        fi
+			if [ $counter -ge $retries ]; then
+				echo "Maximum retries exceeded while writing to $oolerMac, skipping..."
+				break
+			fi
+		done
+	fi
+}
+
+
+#poll Ooler at least once on first startup
+pollOolerUpdateMQTT
+
+
+function poller() {
+	echo "Poller started..."
+	pollCounter=0
+	while [ true ]; do
+		sleep 1
+		if [ $pollCounter -le $pollFrequency ]; then
+			echo "Poll counter: $pollCounter"
+			pollCounter=$((pollCounter+1))
+		else
+			echo "Poll counter: $pollCounter"
+		        pollOolerUpdateMQTT
+		        pollCounter=0
+		fi
+	done
+}
+
+#Start poller
+#poller &
+
+
+while [ true ]; do
+        mosquitto_sub -v -h "$mqttBroker" -t "oolers/$oolerMac/command/#" | while read -r payload
+        do
+
+                topic=$(echo ${payload} | cut -d " " -f1)
+                topicPayload=$(echo ${payload} | cut -d " " -f2|cut -d "." -f1)
+		
+
+		handle=$(echo "$topic"|rev|cut -d "/" -f1|rev)
+		if [ "$handle" = "power" ]; then
+			handle="0x0019"
+		elif [ "$handle" = "fan" ]; then
+			handle="0x0025"
+		elif [ "$handle" = "temp" ]; then
+			handle="0x002c"
+                elif [ "$handle" = "thermostat" ]; then
+                        handle="0x001d"
+		elif [ "$handle" = "water" ]; then
+			handle="0x002f"
+		fi
+
+
+		echo
+		echo "Time: `date`"
+	        echo "Rx: MQTT Message Topic: $topic"
+	        echo "Rx: MQTT Message Payload: $topicPayload"
+
+		if [ "$handle" = "0x001d" ]; then
+			topicPayload=$(printf '%x\n' $topicPayload)
+		fi
+
+		#read-only attributes
+		 ##current temp
+		 if [ "$handle" = "0x002c" ]; then
+		 	continue
+		 fi
+		 ##water level
+                 if [ "$handle" = "0x002f" ]; then
+                        continue
+                 fi
+
+		tryandretry_write $handle $topicPayload
+
+		pollOolerUpdateMQTT
+
+		echo "Current Power: $currentPower"
+		echo "Current Fan: $currentFan"
+		echo "Current Temp: $currentTemp"
+		echo "Current Thermostat: $currentThermostat"
+		echo "Current Water Level: $currentWater"
+        done
+        sleep 1
+done
