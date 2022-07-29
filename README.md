@@ -1,5 +1,7 @@
 # chili-assistant
 
+chili-assistant requires a message bus.  I'm a fan of <a href=https://hub.docker.com/_/eclipse-mosquitto>Mosquitto MQTT</a> which works great with Home Assistant.
+
 Simple execution examples:
 <br>
 <br>
